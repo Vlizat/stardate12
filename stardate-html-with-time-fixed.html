@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stardate e Contador de Tempo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://i.postimg.cc/kGt3Xf0B/b1ef9f3d5b3f362ca9417aa56fb9876d.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stardate,
+    .time {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .footer-text {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      max-width: 300px;
+      font-size: 12px;
+      color: yellow;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 8px;
+      border-radius: 5px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    <div class="stardate">00000.0</div>
+    <div class="time">00:00:00</div>
+  </div>
+  <div class="footer-text">
+    The last two zeros from the left 0 represent the decade starting in 1960 to the present
+     day and the following years infinity. The other zero second from left to right represents the year 
+     from the current decade. The other zeros 00000 from left to right indicate how much later in the year 
+     it is; for example, in November of 1999, the year could be around 808. Every year that passes, it resets to 00000 to 
+     mark the days of the year. The month corresponds to the last zero from left to right after the dot, and it represents the 
+     current day as it increases up to 9 based on the current time, e.g., around 6:45 or 18:45 could represent roughly 7, 8, or 9.
+  </div>
+
+
+  <script>
+    let decade = 0;
+    let year = 0;
+    let dayProgress = 0;
+    let timeOfDay = 0;
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+
+    function updateStardate() {
+      const currentDate = new Date();
+      const startDate = new Date(1960, 0, 1);
+
+      // Calcular a década a partir de 1960 (primeiro dígito)
+      decade = Math.floor((currentDate.getFullYear() - 1960) / 10);
+
+      // Calcular o ano dentro da década atual (segundo dígito)
+      year = currentDate.getFullYear() % 10;
+
+      // Calcular os dias do ano (próximos 3 dígitos)
+      const dayOfYear = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      dayProgress = Math.floor((dayOfYear * 999.0) / 366.0);
+
+      // Calcular a parte decimal baseada na hora do dia
+      timeOfDay = currentDate.getHours() + currentDate.getMinutes() / 60;
+      const decimalPart = Math.round((timeOfDay / 24) * 9);
+
+      // Formatar a stardate
+      const stardate = `${decade}${year}${dayProgress.toString().padStart(3, '0')}.${decimalPart}`;
+      document.querySelector('.stardate').textContent = stardate;
+    }
+
+    function updateTime() {
+      seconds++;
+      if (seconds >= 60) {
+        seconds = 0;
+        minutes++;
+      }
+      if (minutes >= 60) {
+        minutes = 0;
+        hours++;
+      }
+      if (hours >= 100) {
+        hours = 0;
+      }
+
+      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.querySelector('.time').textContent = timeString;
+    }
+
+    // Iniciar as atualizações
+    setInterval(updateStardate, 1000);
+    setInterval(updateTime, 1000);
+  </script>
+</body>
+</html>
