@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stardate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #00ff00; /* Cor do texto */
+            font-size: 1.5em; /* Tamanho do texto */
+            background-image: url('https://i.postimg.cc/cHqFF0pd/b1ef9f3d5b3f362ca9417aa56fb9876d.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .stardate, .timer, .counter, .local-date, .local-time {
+            background: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente para contraste */
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="stardate">
+        Stardate: <span id="stardate">6486222.5790</span>
+    </div>
+    <div class="timer">
+        Timer: <span id="timer">000:00:00:000</span>
+    </div>
+    <div class="counter">
+        Contador: <span id="counter">00000000.000.0000</span>
+    </div>
+    <div class="local-date">
+        Data Local: <span id="localDate">--/--/----</span>
+    </div>
+    <div class="local-time">
+        Hora Local: <span id="localTime">--:--:--</span>
+    </div>
+
+    <script>
+        function calculateStardate() {
+            const now = new Date();
+
+            // Década baseada a partir de 1960
+            const startYear = 1960;
+            const currentYear = now.getFullYear();
+            const decade = Math.floor((currentYear - startYear) / 10);
+
+            // Ano dentro da década atual
+            const yearInDecade = currentYear % 10;
+
+            // "Idade" do ano (proporção do ano atual)
+            const startOfYear = new Date(currentYear, 0, 1);
+            const endOfYear = new Date(currentYear + 1, 0, 1);
+            const yearProgress = ((now - startOfYear) / (endOfYear - startOfYear)) * 99999;
+            const yearAge = Math.floor(yearProgress);
+
+            // "Idade" do dia atual (proporção do dia)
+            const startOfDay = new Date(currentYear, now.getMonth(), now.getDate());
+            const endOfDay = new Date(currentYear, now.getMonth(), now.getDate() + 1);
+            const dayProgress = ((now - startOfDay) / (endOfDay - startOfDay)) * 9999;
+            const dayAge = Math.floor(dayProgress);
+
+            // Formatar Stardate sem parênteses
+            const stardate = `${decade}${yearInDecade}${String(yearAge).padStart(5, '0')}.${String(dayAge).padStart(4, '0')}`;
+            document.getElementById("stardate").innerText = stardate;
+        }
+
+        function startTimer() {
+            let hours = 0;
+            let minutes = 0;
+            let seconds = 0;
+            let milliseconds = 0;
+
+            setInterval(() => {
+                milliseconds += 10;
+                if (milliseconds >= 1000) {
+                    milliseconds = 0;
+                    seconds++;
+                }
+                if (seconds >= 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours++;
+                }
+                if (hours > 999) {
+                    hours = 0;
+                }
+
+                const formattedTimer = 
+                    `${String(hours).padStart(3, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`;
+                document.getElementById("timer").innerText = formattedTimer;
+            }, 10);
+        }
+
+        function startCounter() {
+            let leftPart = 0;
+            let middlePart = 0;
+            let rightPart = 0;
+
+            setInterval(() => {
+                rightPart++;
+                if (rightPart > 9999) {
+                    rightPart = 0;
+                    middlePart++;
+                }
+                if (middlePart > 999) {
+                    middlePart = 0;
+                    leftPart++;
+                }
+                if (leftPart > 99999999) {
+                    leftPart = 0;
+                }
+
+                const formattedCounter = 
+                    `${String(leftPart).padStart(8, '0')}.${String(middlePart).padStart(3, '0')}.${String(rightPart).padStart(4, '0')}`;
+                document.getElementById("counter").innerText = formattedCounter;
+            }, 1000);
+        }
+
+        function updateLocalDateTime() {
+            const now = new Date();
+            const localDate = now.toLocaleDateString();
+            const localTime = now.toLocaleTimeString();
+            document.getElementById("localDate").innerText = localDate;
+            document.getElementById("localTime").innerText = localTime;
+        }
+
+        calculateStardate();
+        startTimer();
+        startCounter();
+        updateLocalDateTime();
+
+        // Atualizar a Stardate a cada minuto
+        setInterval(calculateStardate, 60000);
+
+        // Atualizar data e hora local a cada segundo
+        setInterval(updateLocalDateTime, 1000);
+    </script>
+</body>
+</html>
