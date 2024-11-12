@@ -19,15 +19,27 @@
             background-size: cover;
             background-position: center;
         }
-        .century-decade-year-day, .timer, .counter, .local-date, .local-time {
+        .century-decade-year-day, .timer, .counter, .local-date, .local-time, .hour-age, .week-age, .month-age {
             background: rgba(0, 0, 0, 0.6);
             padding: 10px 20px;
             border-radius: 8px;
             margin: 10px;
         }
+        .texto {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
+    <div class="texto">Em[000]é o seculo depois de 0 depois de cristo o primeiro zero da esquerda para a direita é a decada do século o segundo zero é o ano da decada os quatros zeros 
+        antes do ponto da esquerda para direita 00000 é a idade do ano o zeros depois do ponto 0000 é a idade do dia
+    </div>
     <div class="century-decade-year-day">
         Century-Decade-Year-Day Age: <span id="centuryDisplay">[000]dd0yyyyy.dddd</span>
     </div>
@@ -36,6 +48,15 @@
     </div>
     <div class="counter">
         Counter: <span id="counter">00000000.000.0000</span>
+    </div>
+    <div class="hour-age">
+        Idade da Hora: <span id="hourAge">00000</span>
+    </div>
+    <div class="week-age">
+        Idade da Semana: <span id="weekAge">00000</span>
+    </div>
+    <div class="month-age">
+        Idade do Mês: <span id="monthAge">00000</span>
     </div>
     <div class="local-date">
         Local Date: <span id="localDate">--/--/----</span>
@@ -70,6 +91,33 @@
             const formattedDayAge = String(dayAge).padStart(4, '0');
 
             document.getElementById("centuryDisplay").textContent = `[${formattedCentury}]${decade}${yearInDecade}${formattedYearAge}.${formattedDayAge}`;
+        }
+
+        function displayHourAge() {
+            const now = new Date();
+            const minutes = now.getMinutes();
+            // Calcula a idade da hora (10000 dividido por 60 minutos * minutos atuais)
+            const hourAge = Math.floor((10000 / 60) * minutes);
+            document.getElementById("hourAge").textContent = String(hourAge).padStart(5, '0');
+        }
+
+        function displayWeekAge() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 (Domingo) até 6 (Sábado)
+            // Ajusta para começar na segunda-feira (1) até domingo (7)
+            const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek;
+            // Calcula a idade da semana (aproximadamente 01428 por dia)
+            const weekAge = Math.floor(1428 * adjustedDay);
+            document.getElementById("weekAge").textContent = String(weekAge).padStart(5, '0');
+        }
+
+        function displayMonthAge() {
+            const now = new Date();
+            const currentDay = now.getDate();
+            const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            // Calcula a idade do mês (10000 dividido pelo total de dias no mês * dia atual)
+            const monthAge = Math.floor((10000 / totalDaysInMonth) * currentDay);
+            document.getElementById("monthAge").textContent = String(monthAge).padStart(5, '0');
         }
 
         function startTimer() {
@@ -139,9 +187,15 @@
         startTimer();
         startCounter();
         updateLocalDateTime();
+        displayHourAge();
+        displayWeekAge();
+        displayMonthAge();
 
         setInterval(displayCenturyDecadeYearDayAge, 1000);
         setInterval(updateLocalDateTime, 1000);
+        setInterval(displayHourAge, 1000);
+        setInterval(displayWeekAge, 1000);
+        setInterval(displayMonthAge, 1000);
     </script>
 </body>
 </html>
