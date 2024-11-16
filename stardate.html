@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,27 +17,19 @@
             background-size: cover;
             background-position: center;
         }
-        .century-decade-year-day, .timer, .counter, .local-date, .local-time, .hour-age, .week-age, .month-age {
+        .century-decade-year-day, .timer, .counter, .local-date, .local-time, .hour-age, .week-age, .half-hour-age, .half-day-age, .month-date, .counter-display {
             background: rgba(0, 0, 0, 0.6);
             padding: 10px 20px;
             border-radius: 8px;
             margin: 10px;
         }
-        .texto {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-family: Arial, sans-serif;
-        }
+        
     </style>
 </head>
 <body>
-    <div class="texto">Em[000]é o seculo depois de 0 depois de cristo o primeiro zero da esquerda para a direita é a decada do século o segundo zero é o ano da decada os quatros zeros 
-        antes do ponto da esquerda para direita 00000 é a idade do ano o zeros depois do ponto 0000 é a idade do dia
-    </div>
+    <div id="movel" style="width: 100px; height: 100px; background-color: red; position: absolute; top: 50px; left: 50px;">
+        <p>century-decade-year-day</p>
+      </div>
     <div class="century-decade-year-day">
         Century-Decade-Year-Day Age: <span id="centuryDisplay">[000]dd0yyyyy.dddd</span>
     </div>
@@ -55,8 +45,14 @@
     <div class="week-age">
         Idade da Semana: <span id="weekAge">00000</span>
     </div>
-    <div class="month-age">
-        Idade do Mês: <span id="monthAge">00000</span>
+    <div class="half-hour-age">
+        Idade da Meia Hora: <span id="halfHourAge">00000</span>
+    </div>
+    <div class="half-day-age">
+        Idade da Metade do Dia: <span id="halfDayAge">00000</span>
+    </div>
+    <div class="month-date">
+        Month Date: <span id="monthDate">0000</span>
     </div>
     <div class="local-date">
         Local Date: <span id="localDate">--/--/----</span>
@@ -64,7 +60,28 @@
     <div class="local-time">
         Local Time: <span id="localTime">--:--:--</span>
     </div>
-
+    <div class="counter-container">
+        <div class="counter-display" id="counterDisplay">0</div>
+        <div class="buttons">
+            <label for="hourInput">Digite as horas:</label>
+            <input type="number" id="hourInput" placeholder="Ex: 24">
+            <button id="convertToSeconds">Converter para Segundos</button>
+            <button id="addSecondsToCounter">Adicionar ao Contador</button>
+            <div id="conversionResult">Resultado: 0 segundos</div>
+            <button id="button10">Tela Cheia</button>
+            <button id="button11">Mover para Cima</button>
+<button id="button12">Mover para Baixo</button>
+<button id="button13">Mover para Esquerda</button>
+<button id="button14">Mover para Direita</button>
+<button id="buttonIncrease1">Aumentar 1</button>
+<button id="buttonIncrease2">Aumentar 2</button>
+<button id="buttonIncrease10">Aumentar 10</button>
+<button id="buttonIncrease1000">Aumentar 1000</button>
+<button id="buttonAddHouse">Adicionar Casa +</button>
+<button id="buttonRemoveHouse">Remover Casa -</button>
+<button id="buttonStartCountdown">Iniciar Contagem Regressiva</button>
+<button id="buttonReset">Resetar</button>
+        </div>
     <script>
         function displayCenturyDecadeYearDayAge() {
             const currentYear = new Date().getFullYear();
@@ -96,28 +113,40 @@
         function displayHourAge() {
             const now = new Date();
             const minutes = now.getMinutes();
-            // Calcula a idade da hora (10000 dividido por 60 minutos * minutos atuais)
             const hourAge = Math.floor((10000 / 60) * minutes);
             document.getElementById("hourAge").textContent = String(hourAge).padStart(5, '0');
         }
 
         function displayWeekAge() {
             const now = new Date();
-            const dayOfWeek = now.getDay(); // 0 (Domingo) até 6 (Sábado)
-            // Ajusta para começar na segunda-feira (1) até domingo (7)
+            const dayOfWeek = now.getDay();
             const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek;
-            // Calcula a idade da semana (aproximadamente 01428 por dia)
             const weekAge = Math.floor(1428 * adjustedDay);
             document.getElementById("weekAge").textContent = String(weekAge).padStart(5, '0');
         }
 
-        function displayMonthAge() {
+        function displayHalfHourAge() {
             const now = new Date();
-            const currentDay = now.getDate();
-            const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            // Calcula a idade do mês (10000 dividido pelo total de dias no mês * dia atual)
-            const monthAge = Math.floor((10000 / totalDaysInMonth) * currentDay);
-            document.getElementById("monthAge").textContent = String(monthAge).padStart(5, '0');
+            const minutes = now.getMinutes();
+            const halfHourAge = Math.floor((10000 / 30) * (minutes % 30));
+            document.getElementById("halfHourAge").textContent = String(halfHourAge).padStart(5, '0');
+        }
+
+        function displayHalfDayAge() {
+            const now = new Date();
+            const hours = now.getHours();
+            const halfDayAge = Math.floor((10000 / 12) * (hours % 12));
+            document.getElementById("halfDayAge").textContent = String(halfDayAge).padStart(5, '0');
+        }
+
+        function displayMonthDate() {
+            const now = new Date();
+            const month = now.getMonth(); // Mês começa em 0, então janeiro é 0, fevereiro é 1, etc.
+            const totalDaysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate(); // Número de dias no mês atual
+            const daysElapsedInMonth = now.getDate(); // Número de dias passados no mês atual
+            const monthDate = Math.floor((1000 / totalDaysInMonth) * daysElapsedInMonth); // 1000 por mês
+
+            document.getElementById("monthDate").textContent = String(monthDate).padStart(4, '0');
         }
 
         function startTimer() {
@@ -189,13 +218,209 @@
         updateLocalDateTime();
         displayHourAge();
         displayWeekAge();
-        displayMonthAge();
+        displayHalfHourAge();
+        displayHalfDayAge();
+        displayMonthDate(); // Chama a função para exibir o Month Date
 
         setInterval(displayCenturyDecadeYearDayAge, 1000);
         setInterval(updateLocalDateTime, 1000);
         setInterval(displayHourAge, 1000);
         setInterval(displayWeekAge, 1000);
-        setInterval(displayMonthAge, 1000);
+        setInterval(displayHalfHourAge, 1000);
+        setInterval(displayHalfDayAge, 1000);
+        setInterval(displayMonthDate, 1000); // Atualiza o Month Date a cada segundo
+
+
+        document.getElementById("button10").addEventListener("click", function() {
+    var img = document.getElementById("imagem");
+    img.style.width = "100vw";  // Expande a imagem para a largura total da tela
+    img.style.height = "100vh"; // Expande a imagem para a altura total da tela
+  });
+
+
+// Variáveis para controlar o valor e o formato
+// Variáveis para controlar o valor e o formato
+let counter = 0;
+let currentFormat = 3;
+let countdownInterval = null;
+let isCountingDown = false;
+
+// Formata o contador com pontos a cada 3 dígitos
+function formatCounter() {
+    let strCounter = Math.abs(counter).toString().padStart(currentFormat, '0');
+    let formattedCounter = "";
+    
+    for (let i = 0; i < strCounter.length; i++) {
+        formattedCounter += strCounter[i];
+        if ((strCounter.length - i - 1) % 3 === 0 && i !== strCounter.length - 1) {
+            formattedCounter += ".";
+        }
+    }
+    
+    return formattedCounter;
+}
+
+// Atualiza o display do contador
+function updateDisplay() {
+    document.getElementById("counterDisplay").textContent = formatCounter();
+}
+
+// Função para aumentar o valor
+function increaseCounter(value) {
+    if (!isCountingDown) {  // Só permite aumentar se não estiver em contagem regressiva
+        counter += value;
+        updateDisplay();
+    }
+}
+
+// Função para iniciar a contagem regressiva
+function startCountdown() {
+    // Limpa qualquer intervalo anterior
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+    
+    // Só inicia se o contador for maior que 0
+    if (counter > 0) {
+        isCountingDown = true;
+        
+        countdownInterval = setInterval(() => {
+            if (counter > 0) {
+                counter--;
+                updateDisplay();
+            } else {
+                stopCountdown();
+                alert("Contagem regressiva finalizada!");
+            }
+        }, 1000);
+    }
+}
+
+// Função para parar a contagem regressiva
+function stopCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    isCountingDown = false;
+}
+
+// Adiciona uma casa ao contador
+function addHouse() {
+    if (!isCountingDown) {  // Só permite modificar se não estiver em contagem regressiva
+        currentFormat++;
+        updateDisplay();
+    }
+}
+
+// Remove uma casa do contador
+function removeHouse() {
+    if (!isCountingDown && currentFormat > 1) {  // Só permite modificar se não estiver em contagem regressiva
+        currentFormat--;
+        updateDisplay();
+    }
+}
+
+// Reseta o contador e as casas
+function resetCounter() {
+    stopCountdown();
+    counter = 0;
+    currentFormat = 3;
+    updateDisplay();
+}
+
+// Calcula segundos a partir de horas
+function convertHoursToSeconds() {
+    const hours = parseInt(document.getElementById("hourInput").value) || 0;
+    const seconds = hours * 3600;
+    document.getElementById("conversionResult").textContent = `Resultado: ${seconds} segundos`;
+    return seconds;
+}
+
+// Adiciona segundos ao contador
+function addSecondsToCounter() {
+    if (!isCountingDown) {  // Só permite adicionar se não estiver em contagem regressiva
+        const seconds = convertHoursToSeconds();
+        counter += seconds;
+        updateDisplay();
+    }
+}
+
+// Configuração dos event listeners
+document.getElementById("convertToSeconds").addEventListener("click", convertHoursToSeconds);
+document.getElementById("addSecondsToCounter").addEventListener("click", addSecondsToCounter);
+document.getElementById("buttonIncrease1").addEventListener("click", () => increaseCounter(1));
+document.getElementById("buttonIncrease2").addEventListener("click", () => increaseCounter(2));
+document.getElementById("buttonIncrease10").addEventListener("click", () => increaseCounter(10));
+document.getElementById("buttonIncrease1000").addEventListener("click", () => increaseCounter(1000));
+document.getElementById("buttonAddHouse").addEventListener("click", addHouse);
+document.getElementById("buttonRemoveHouse").addEventListener("click", removeHouse);
+document.getElementById("buttonStartCountdown").addEventListener("click", startCountdown);
+document.getElementById("buttonReset").addEventListener("click", resetCounter);
+
+// Inicializa o display
+updateDisplay();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
 </body>
 </html>
