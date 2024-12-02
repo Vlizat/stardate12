@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeros e Packs com Cronômetro</title>
+    <style>
+        @font-face {
+            font-family: 'Klinzhai';
+            src: url('./fonte/Klinzhai.ttf') format('truetype');
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .timer, .pack-display {
+            margin: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+            font-family: 'Klinzhai', monospace;
+        }
+        .timer {
+            font-size: 2rem;
+            font-family: Arial, Helvetica, sans-serif, monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Zeros e Packs com Cronômetro</h1>
+    <div class="timer" id="timerDisplay">00:00:00</div>
+    <div id="packContainers"></div>
+
+    <script>
+        const startTime = Date.now(); // Hora inicial
+        const intervals = [
+            { label: "1 segundo", duration: 1000 },
+            { label: "30 segundos", duration: 30000 },
+            { label: "10 minutos", duration: 600000 },
+            { label: "1 hora", duration: 3600000 },
+            { label: "5 horas", duration: 18000000 },
+            { label: "10 horas", duration: 36000000 },
+            { label: "20 horas", duration: 72000000 },
+            { label: "40 horas", duration: 144000000 },
+            { label: "1 semana", duration: 604800000 },
+            { label: "1 mês", duration: 2592000000 },
+            { label: "6 meses", duration: 15552000000 },
+            { label: "12 meses", duration: 31104000000 },
+            { label: "5 anos", duration: 155520000000 },
+            { label: "10 anos", duration: 311040000000 },
+            { label: "100 anos", duration: 3110400000000 },
+            { label: "1000 anos", duration: 31104000000000 },
+            { label: "1 milhão de anos", duration: 31104000000000000 }
+        ];
+
+        const timerDisplay = document.getElementById("timerDisplay");
+        const packContainers = document.getElementById("packContainers");
+
+        // Configuração inicial de cada intervalo
+        intervals.forEach(interval => {
+            const container = document.createElement("div");
+            container.className = "pack-display";
+            container.id = `pack-${interval.label.replace(/\s/g, "-")}`;
+            container.textContent = `${interval.label}: 1 / ${"0".repeat(20)}`;
+            packContainers.appendChild(container);
+            interval.zeroString = "0".repeat(20);
+            interval.packCount = 1;
+        });
+
+        // Atualiza o cronômetro principal
+        function updateTimer() {
+            const elapsedTime = Date.now() - startTime;
+            const seconds = Math.floor(elapsedTime / 1000) % 60;
+            const minutes = Math.floor(elapsedTime / 60000) % 60;
+            const hours = Math.floor(elapsedTime / 3600000);
+            timerDisplay.textContent =
+                `${hours.toString().padStart(2, '0')}:` +
+                `${minutes.toString().padStart(2, '0')}:` +
+                `${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Atualiza os contadores de zeros e packs
+        function updatePacks() {
+            const currentTime = Date.now();
+            intervals.forEach(interval => {
+                // Verifica se o intervalo foi atingido
+                if ((currentTime - startTime) % interval.duration < 1000) {
+                    if (interval.zeroString.length > 1) {
+                        // Remove um zero do pack
+                        interval.zeroString = interval.zeroString.slice(0, -1);
+                    } else {
+                        // Reinicia o pack e incrementa o contador
+                        interval.packCount++;
+                        interval.zeroString = "0".repeat(20);
+                    }
+                    // Atualiza o display correspondente
+                    const container = document.getElementById(`pack-${interval.label.replace(/\s/g, "-")}`);
+                    container.textContent = `${interval.label}: ${interval.packCount} / ${interval.zeroString}`;
+                }
+            });
+        }
+
+        setInterval(updateTimer, 1000);
+        setInterval(updatePacks, 1000);
+    </script>
+</body>
+</html>
