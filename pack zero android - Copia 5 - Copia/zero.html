@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Rastreador de Zeros no Tempo (Loop)</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 20px;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .time-section {
+            background-color: white;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .time-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .loop-count {
+            color: #666;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rastreador de Zeros no Tempo (Loop Infinito)</h1>
+    <div id="timer">Tempo Total: 0s</div>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+        const timerDisplay = document.getElementById('timer');
+        
+        const TIME_SCALES = [
+            { name: '1 minuto', seconds: 60, zeroInterval: 6, zeros: 10 },
+            { name: '5 minutos', seconds: 300, zeroInterval: 30, zeros: 10 },
+            { name: '10 minutos', seconds: 600, zeroInterval: 60, zeros: 20 },
+            { name: '1 hora', seconds: 3600, zeroInterval: 360, zeros: 10 },
+            { name: '5 horas', seconds: 18000, zeroInterval: 1800, zeros: 10 },
+            { name: '10 horas', seconds: 36000, zeroInterval: 3600, zeros: 10 },
+            { name: '20 horas', seconds: 72000, zeroInterval: 7200, zeros: 10 },
+            { name: '40 horas', seconds: 144000, zeroInterval: 14400, zeros: 10 },
+            { name: '1 semana', seconds: 604800, zeroInterval: 60480, zeros: 10 },
+            { name: '1 mês', seconds: 2592000, zeroInterval: 259200, zeros: 10 },
+            { name: '6 meses', seconds: 15552000, zeroInterval: 1555200, zeros: 10 },
+            { name: '12 meses', seconds: 31104000, zeroInterval: 3110400, zeros: 10 },
+            { name: '5 anos', seconds: 157680000, zeroInterval: 15768000, zeros: 10 },
+            { name: '10 anos', seconds: 315360000, zeroInterval: 31536000, zeros: 10 },
+            { name: '100 anos', seconds: 3153600000, zeroInterval: 315360000, zeros: 10 },
+            { name: '1000 anos', seconds: 31536000000, zeroInterval: 3153600000, zeros: 10 },
+            { name: '10.000 anos', seconds: 315360000000, zeroInterval: 31536000000, zeros: 10 }
+        ];
+
+        let totalSeconds = 0;
+        let activeTimeScales = [];
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function createTimeTracker(config) {
+            const section = document.createElement('div');
+            section.className = 'time-section';
+            
+            const label = document.createElement('span');
+            label.className = 'time-label';
+            label.textContent = config.name;
+            
+            const display = document.createElement('span');
+            display.textContent = '0'.repeat(config.zeros);
+            
+            const loopCount = document.createElement('span');
+            loopCount.className = 'loop-count';
+            loopCount.textContent = 'Loops: 0';
+            
+            section.appendChild(label);
+            section.appendChild(display);
+            section.appendChild(loopCount);
+            output.appendChild(section);
+
+            return {
+                ...config,
+                element: display,
+                loopCountElement: loopCount,
+                currentZeros: config.zeros,
+                lastUpdateTime: 0,
+                loops: 0
+            };
+        }
+
+        function updateTimer() {
+            totalSeconds++;
+            timerDisplay.textContent = `Tempo Total: ${totalSeconds}s (${formatTime(totalSeconds)})`;
+        }
+
+        function updateTimeScales() {
+            activeTimeScales.forEach(scale => {
+                if (totalSeconds % scale.zeroInterval === 0 && scale.currentZeros > 0) {
+                    scale.currentZeros--;
+                    const newZeroString = '0'.repeat(scale.currentZeros);
+                    scale.element.textContent = newZeroString;
+                }
+
+                // Resetar quando todos os zeros forem consumidos
+                if (scale.currentZeros === 0) {
+                    scale.currentZeros = scale.zeros;
+                    scale.element.textContent = '0'.repeat(scale.zeros);
+                    scale.loops++;
+                    scale.loopCountElement.textContent = `Loops: ${scale.loops}`;
+                }
+            });
+        }
+
+        // Inicialização
+        function init() {
+            // Criar rastreadores para cada escala de tempo
+            activeTimeScales = TIME_SCALES.map(createTimeTracker);
+
+            // Timer global
+            setInterval(updateTimer, 1000);
+
+            // Atualização das escalas de tempo
+            setInterval(updateTimeScales, 1000);
+        }
+
+        // Iniciar o rastreador
+        init();
+    </script>
+</body>
+</html>
