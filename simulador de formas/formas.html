@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10x10 Grid Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 300px;
+            height: 300px;
+            gap: 1px;
+            border: 2px solid black;
+            background-color: white;
+        }
+
+        .pixel {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #frame-info {
+            margin-top: 10px;
+        }
+
+        #progress {
+            width: 300px;
+            height: 20px;
+            background-color: #ddd;
+            margin-top: 10px;
+            border: 1px solid #000;
+            position: relative;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #76c7c0;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <h1>10x10 Grid Simulation</h1>
+    <div id="grid"></div>
+
+    <div id="controls">
+        <button id="save-frame">Salvar Frame Atual</button>
+        <button id="reset-grid">Resetar</button>
+        <button id="start-auto">Iniciar Automação</button>
+        <button id="stop-auto">Parar Automação</button>
+        <button id="next-frame">Gerar Próxima Imagem</button>
+        <button id="load-saved">Carregar Estado Salvo</button>
+    </div>
+
+    <div id="frame-info">Frame Atual: <span id="current-frame">0</span> / 1.000.000 | Geração: <span id="current-generation">1</span></div>
+    <div id="progress">
+        <div id="progress-bar"></div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const frameInfo = document.getElementById('current-frame');
+        const generationInfo = document.getElementById('current-generation');
+        const progressBar = document.getElementById('progress-bar');
+        let currentFrame = 0;
+        let isAutoRunning = false;
+        const savedFrames = JSON.parse(localStorage.getItem('frames10x10')) || [];
+
+        // Generate initial grid
+        function createGrid() {
+            grid.innerHTML = '';
+            for (let i = 0; i < 100; i++) {
+                const pixel = document.createElement('div');
+                pixel.classList.add('pixel');
+                grid.appendChild(pixel);
+            }
+        }
+
+        // Update frame, generation info, and progress bar
+        function updateInfo() {
+            const generation = Math.floor(currentFrame / 1000000) + 1;
+            const frameInGeneration = currentFrame % 1000000;
+
+            frameInfo.textContent = `${frameInGeneration} / 1.000.000`;
+            generationInfo.textContent = generation;
+
+            const progress = (frameInGeneration / 1000000) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Generate random colors and shapes for the grid
+        function generateFrame() {
+            const pixels = document.querySelectorAll('.pixel');
+            pixels.forEach(pixel => {
+                const randomColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.random().toFixed(2)})`;
+                pixel.style.backgroundColor = randomColor;
+            });
+            currentFrame++;
+            updateInfo();
+        }
+
+        // Save the current frame to localStorage
+        function saveFrame() {
+            const pixels = Array.from(document.querySelectorAll('.pixel')).map(pixel => pixel.style.backgroundColor);
+            savedFrames.push({ frame: currentFrame, pixels });
+            localStorage.setItem('frames10x10', JSON.stringify(savedFrames));
+            alert(`Frame ${currentFrame} salvo!`);
+        }
+
+        // Load a saved frame
+        function loadSavedFrame() {
+            if (savedFrames.length === 0) {
+                alert('Nenhum frame salvo!');
+                return;
+            }
+            const lastSavedFrame = savedFrames[savedFrames.length - 1];
+            const pixels = document.querySelectorAll('.pixel');
+            lastSavedFrame.pixels.forEach((color, index) => {
+                pixels[index].style.backgroundColor = color;
+            });
+            currentFrame = lastSavedFrame.frame;
+            updateInfo();
+            alert(`Frame ${currentFrame} carregado!`);
+        }
+
+        // Reset the grid to the initial state
+        function resetGrid() {
+            const pixels = document.querySelectorAll('.pixel');
+            pixels.forEach(pixel => pixel.style.backgroundColor = 'white');
+            currentFrame = 0;
+            updateInfo();
+        }
+
+        // Start automatic simulation
+        function startAutoSimulation() {
+            if (isAutoRunning) return;
+            isAutoRunning = true;
+            const interval = setInterval(() => {
+                if (!isAutoRunning) {
+                    clearInterval(interval);
+                    return;
+                }
+                generateFrame();
+            }, 1000);
+        }
+
+        // Stop automatic simulation
+        function stopAutoSimulation() {
+            isAutoRunning = false;
+        }
+
+        // Event listeners
+        document.getElementById('save-frame').addEventListener('click', saveFrame);
+        document.getElementById('reset-grid').addEventListener('click', resetGrid);
+        document.getElementById('start-auto').addEventListener('click', startAutoSimulation);
+        document.getElementById('stop-auto').addEventListener('click', stopAutoSimulation);
+        document.getElementById('next-frame').addEventListener('click', generateFrame);
+        document.getElementById('load-saved').addEventListener('click', loadSavedFrame);
+
+        // Initialize
+        createGrid();
+        updateInfo();
+    </script>
+</body>
+</html>
